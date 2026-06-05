@@ -1,0 +1,34 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Marcus Temp Files
+temp/
+temp_Marcus_*.mp3
+intro_riff.mp3
+*.mp4
+media_debug.txt
+temp_news_img.jpg
+
+# Environment/Secrets
+.env
+credentials.json
+token.json
+
+# IDE settings
+.vscode/
+
+# Local Database, Memory, and Maps
+chroma_db/
+marcus_memory.json
+memory_backup.json
+neural_index_state.json
+local_reminders.json
+brain_map.html
+intent_cache.json
+
+# OS generated files
+.DS_Store
+Thumbs.db

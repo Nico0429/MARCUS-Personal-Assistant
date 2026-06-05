@@ -1,0 +1,16 @@
+M.A.R.C.U.S. (Matrix Analytics & Resource Controller)
+
+
+Fix hide functionality for timer + buttons for timer
+fix x button for media UI
+Automatically show marcus when wake word is heard (Do this via bus event)
+
+Make him say "mm?" when he hears a wake word. (NOT every time he enters listening mode)
+Give him a "playlist" of intro riff songs (Add "play a song" method)
+Incorporate petrol prices into news report
+Allow him to schedule a reply (e.g. can you give me the news at 12:00)
+-Allow him to speak when deep work timer runs out (Or actually better alternative is push notifications, also when you set a reminder and he is muted)
+-Give access to more of notion
+-Give access to Garmin data
+-Give him "eyes" so he can see camera but also see my screen
+-Fix transfer from nmu calendar to gcal (Its broken again)
