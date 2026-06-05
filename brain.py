@@ -98,6 +98,22 @@ class MarcusBrain:
     # ==========================================
     async def chat_async(self, query):
         self.interrupt_event.clear()
+        
+        # --- THE FIX: Unpack overzealous LLM JSON arrays ---
+        if isinstance(query, list):
+            # If it's a list inside a list (e.g. [['command']])
+            if len(query) > 0 and isinstance(query[0], list):
+                 query = query[0][0]
+            # If it's just a flat list (e.g. ['command'])
+            elif len(query) > 0:
+                 query = query[0]
+            else:
+                 query = "" # Failsafe for empty arrays
+                 
+        # Ensure it's a string before running string methods
+        query = str(query)
+        # --------------------------------------------------
+        
         query_l = query.lower().strip()
         loop = asyncio.get_running_loop()
 
