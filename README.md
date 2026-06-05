@@ -27,10 +27,8 @@ Unlike standard wrapper scripts, MARCUS operates on a highly scalable, event-dri
 
 ## 🖼️ Interface Showcase
 
-*(Add a screenshot of your terminal UI here)*
 `![Terminal View](docs\images\MARCUS_TERMINAL_IMAGE.png)`
 
-*(Add a screenshot of the 3D Brain Matrix here)*
 `![Brain Matrix View](docs\images\MARCUS_BRAIN_IMAGE.png)`
 
 ## ⚙️ Local Setup & Installation
