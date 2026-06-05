@@ -37,3 +37,13 @@ Unlike standard wrapper scripts, MARCUS operates on a highly scalable, event-dri
 ```bash
 git clone [https://github.com/](https://github.com/)<YOUR_USERNAME>/MARCUS-AI.git
 cd MARCUS-AI
+
+**2. Install Dependencies**
+`pip install -r requirements.txt`
+
+**3. Download Core Assets**
+Run the setup script to securely download the required neural models and audio binaries.
+`python setup_assets.py`
+
+**4. Configure Environment**
+...
