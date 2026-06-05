@@ -76,13 +76,16 @@ class TimerSkill:
             self.active_timer_task.cancel() 
             print(f"[ TimerSkill ] Timer cancelled via {'UI' if ui_triggered else 'Voice/Terminal'}.")
             
-            if ui_triggered:
-                # Direct confirmation to HUD/Terminal to avoid verbal interruption
-                await bus.emit("user_spoken_text", f"\n[ System ] Timer for '{self.current_task_name}' manually terminated.")
-            else:
-                await say("Timer aborted.")
-            return True
-        return False
+        # --- FORCE UI HIDE HERE INSTEAD ---
+        await bus.emit("timer_ui_control", {"action": "hide"})
+            
+        if ui_triggered:
+            # Direct confirmation to HUD/Terminal to avoid verbal interruption
+            await bus.emit("user_spoken_text", f"\n[ System ] Timer for '{self.current_task_name}' manually terminated.")
+        else:
+            from voice import say
+            await say("Timer aborted.")
+        return True
 
     async def _run_countdown(self, minutes, task_name):
         # INITIAL SHOW
@@ -113,8 +116,9 @@ class TimerSkill:
             except Exception as e:
                 print(f"[ Notification Error ] {e}")
                 
+            from voice import say
             await say(f"Sir, your designated time for {task_name} has concluded.")
             
         except asyncio.CancelledError:
-            await bus.emit("timer_ui_control", {"action": "hide"})
+            # WE DELETED THE "HIDE" COMMAND HERE TO PREVENT RACE CONDITIONS
             raise
