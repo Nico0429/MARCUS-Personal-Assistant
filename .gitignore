@@ -7,7 +7,6 @@ __pycache__/
 # Marcus Temp Files
 temp/
 temp_Marcus_*.mp3
-intro_riff.mp3
 *.mp4
 media_debug.txt
 temp_news_img.jpg
@@ -32,3 +31,7 @@ intent_cache.json
 # OS generated files
 .DS_Store
 Thumbs.db
+
+*.exe
+*.onnx
+*.tflite
