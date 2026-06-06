@@ -132,7 +132,7 @@ class MediaWindow(MarcusBaseWindow):
                 self.play_btn.setText("\uE768") # Native Play Icon
             
             if action == "show":
-                self.show()
+                self.fade_in()
                 
         elif action == "hide":
-            self.hide()
+            self.fade_out()

@@ -55,7 +55,7 @@ class UIManager(QObject):
         if self._is_ghost_mode:
             # 1. Hide Core
             if self.face: self.face.hide()
-            if self.library: self.library.hide()
+            if self.library: self.library.fade_out()
             
             # --- SAFETY CATCH: Force hide the grid if it was somehow open ---
             if self.grid: self.grid.hide()
@@ -63,33 +63,33 @@ class UIManager(QObject):
             # 2. Track & Hide Active Peripherals
             if self.graph and self.graph.windowOpacity() > 0:
                 self._was_graph_open = True
-                self.graph.hide()
+                self.graph.fade_out()
             else:
                 self._was_graph_open = False
 
             if self.media and self.media.isVisible():
                 self._was_media_open = True
-                self.media.hide()
+                self.media.fade_out()
             else:
                 self._was_media_open = False
 
             if self.timer and self.timer.isVisible():
                 self._was_timer_open = True
-                self.timer.hide()
+                self.timer.fade_out()
             else:
                 self._was_timer_open = False
                 
         else:
             # 1. Restore Core
-            if self.library: self.library.show()
-            if self.face: self.face.show()
+            if self.library: self.library.fade_in()
+            if self.face: self.face.fade_in()
             
                 
             # 2. Restore Peripherals ONLY if they were active
-            if self._was_graph_open and self.graph: self.graph.show()
-            if self._was_media_open and self.media: self.media.show()
+            if self._was_graph_open and self.graph: self.graph.fade_in()
+            if self._was_media_open and self.media: self.media.fade_in()
             
-            if self._was_timer_open and self.timer: self.timer.show()
+            if self._was_timer_open and self.timer: self.timer.fade_in()
             
             # Instantly re-assert the hierarchy
             self.enforce_global_hierarchy()

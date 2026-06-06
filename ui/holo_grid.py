@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt, QPoint, QRect
 from PySide6.QtGui import QPainter, QPen, QColor, QGuiApplication, QMouseEvent
 from event_engine import bus
+from PySide6.QtCore import Qt, QPoint, QRect, QPropertyAnimation, QEasingCurve
 
 # ==========================================
 # 1. THE HOLOGRAPHIC VISUAL OVERLAY
@@ -146,3 +147,29 @@ class MarcusBaseWindow(QWidget):
                 self.move(snapped_x, snapped_y)
                 
             event.accept()
+
+    def fade_in(self):
+        """Hardware-accelerated OS fade-in animation."""
+        if not self.isVisible():
+            self.setWindowOpacity(0.0)
+            self.show()
+            
+        # Create a GPU animation targeting the 'windowOpacity' property
+        self._fade_anim = QPropertyAnimation(self, b"windowOpacity")
+        self._fade_anim.setDuration(200) # 200 milliseconds
+        self._fade_anim.setStartValue(self.windowOpacity())
+        self._fade_anim.setEndValue(1.0)
+        self._fade_anim.setEasingCurve(QEasingCurve.OutCubic)
+        self._fade_anim.start()
+
+    def fade_out(self):
+        """Hardware-accelerated OS fade-out animation."""
+        self._fade_anim = QPropertyAnimation(self, b"windowOpacity")
+        self._fade_anim.setDuration(200)
+        self._fade_anim.setStartValue(self.windowOpacity())
+        self._fade_anim.setEndValue(0.0)
+        self._fade_anim.setEasingCurve(QEasingCurve.InCubic)
+        
+        # When the opacity reaches exactly 0.0, tell Qt to fully hide the window
+        self._fade_anim.finished.connect(self.hide) 
+        self._fade_anim.start()

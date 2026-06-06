@@ -105,14 +105,15 @@ class SystemEventBridge:
             self.face.set_thinking(False)
             self.face.set_listening(False)
 
+    @asyncSlot(object)
     async def on_shutdown(self, _):
         print("[ System ] Lowering reactor rods... preparing for shutdown.")
+        
+        # 1. Kill backend processes
         self.marcus_daemon.running = False
         self.terminal_window.active_stream_id = -1 
-        self.terminal_window.hide()
-        self.face.trigger_shutdown()
-        await asyncio.sleep(1.5)
-        # Trigger the callback to cleanly kill the main while loop
+        
+        # 2. Instantly hand over visual control to main.py's cinematic teardown sequence
         self.shutdown_callback()
 
     async def on_manual_text(self, text):

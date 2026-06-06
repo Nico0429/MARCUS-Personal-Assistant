@@ -103,6 +103,17 @@ async def main_async():
     def trigger_shutdown():
         global is_running_main
         is_running_main = False
+        
+        print("[ System ] Initiating cinematic UI teardown...")
+        keyboard.unhook_all()
+        
+        # Trigger Ghost Mode instantly to perfectly sync the fade-out of ALL windows!
+        if not ui_manager._is_ghost_mode:
+            from event_engine import bus
+            bus.emit_sync("toggle_ui_visibility", {})
+        
+        # Tell the face to shrink into nothingness
+        face.trigger_shutdown()
 
     event_bridge = SystemEventBridge(
         brain=shared_brain,
@@ -122,7 +133,7 @@ async def main_async():
     print("[ System ] Neural link established. Initializing UI...")
     audio_daemon.play_blip() 
     face.show()
-    terminal_window.show()
+    terminal_window.fade_in()
     edge_pulse.start()
 
     await asyncio.sleep(3.0)
@@ -154,8 +165,11 @@ async def main_async():
     while is_running_main:
         await asyncio.sleep(0.5)
 
+
+    # The UI already faded away while Marcus was talking, so we can exit instantly!
     print("[ System ] main_async completed. Cleaning up Qt loop...")
     QApplication.instance().quit()
+
 
 if __name__ == "__main__":
     def force_quit(signum, frame):

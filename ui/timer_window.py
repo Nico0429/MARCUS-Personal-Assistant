@@ -84,8 +84,8 @@ class TimerWindow(MarcusBaseWindow):
             self.time_label.setText(data.get("time_str", "00:00"))
             self.is_paused = False
             self.pause_btn.setText("PAUSE")
-            self.show()
+            self.fade_in()
         elif action == "update":
             self.time_label.setText(data.get("time_str", "00:00"))
         elif action == "hide":
-            self.hide()
+            self.fade_out()
