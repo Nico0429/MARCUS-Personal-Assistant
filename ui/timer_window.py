@@ -3,12 +3,11 @@ from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtGui import QFont, QGuiApplication, QMouseEvent, QCursor
 from qasync import asyncSlot
 from event_engine import bus
+from ui.holo_grid import MarcusBaseWindow
 
-class TimerWindow(QWidget):
+class TimerWindow(MarcusBaseWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(300, 140) # Increased height slightly to fit buttons
         self.setCursor(Qt.PointingHandCursor)
         
@@ -60,8 +59,6 @@ class TimerWindow(QWidget):
         # -----------------------
 
         self.hide()
-        self._drag_active = False
-        self._drag_pos = QPoint()
         self.is_paused = False
         
         bus.subscribe("timer_ui_control", self.on_timer_update)
@@ -77,24 +74,7 @@ class TimerWindow(QWidget):
     def _on_stop_clicked(self):
         bus.emit_sync("timer_manual_action", {"action": "stop"})
 
-    # --- MOUSE DRAG EVENTS ---
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = True
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            self.setCursor(Qt.ClosedHandCursor)
-            event.accept()
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self._drag_active:
-            self.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = False
-            self.setCursor(Qt.PointingHandCursor)
-            event.accept()
+   
 
     @asyncSlot(dict)
     async def on_timer_update(self, data):

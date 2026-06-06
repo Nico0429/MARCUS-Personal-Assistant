@@ -7,10 +7,11 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTextBrowser,
 from PySide6.QtCore import Signal, Qt, QTimer, QMetaObject
 from PySide6.QtGui import QFont, QTextCursor, QCloseEvent, QIcon, QMouseEvent, QPixmap
 from qasync import asyncSlot 
+from ui.holo_grid import MarcusBaseWindow
 
 from event_engine import bus 
 
-class LibraryWindow(QWidget):
+class LibraryWindow(MarcusBaseWindow):
     header_signal = Signal(str, str) 
     stream_signal = Signal(str)
 
@@ -23,8 +24,6 @@ class LibraryWindow(QWidget):
         self.active_stream_id = 0
 
         # --- 1. JARVIS AESTHETICS ---
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle("MARCUS - Neural Terminal")
         self.setWindowIcon(QIcon("marcus_icon.png")) 
         self.setFixedSize(450, 600)
@@ -128,9 +127,7 @@ class LibraryWindow(QWidget):
         self.pre_fold_pos = None
         self.move(10, 10)
 
-        self._drag_active = False
-        from PySide6.QtCore import QPoint 
-        self._drag_pos = QPoint()
+       
 
      
 
@@ -233,7 +230,12 @@ class LibraryWindow(QWidget):
             self.input_field.hide()
             self.news_image_label.hide()
             self.fold_btn.setText("[+]")
-            self.setFixedSize(160, 45)
+            
+            # --- THE ALIGNMENT FIX ---
+            # 40px Grid Height - 25px Buttons = 15px. 
+            # 7px top margin, 8px bottom margin perfectly centers them!
+            self.hud_layout.setContentsMargins(10, 7, 10, 8)
+            self.setFixedSize(160, 40)
             
             bus.emit_sync("terminal_folded", {"state": True, "pos": {"x": self.pos().x(), "y": self.pos().y()}})
         else:
@@ -244,6 +246,9 @@ class LibraryWindow(QWidget):
             if self.news_image_label.pixmap() and not self.news_image_label.pixmap().isNull():
                 self.news_image_label.show()
             self.fold_btn.setText("[-]")
+            
+            # RESTORE DEFAULT MARGINS
+            self.hud_layout.setContentsMargins(10, 10, 10, 10)
             self.setFixedSize(450, self.normal_height) 
             
             bus.emit_sync("terminal_folded", {"state": False})
@@ -280,27 +285,21 @@ class LibraryWindow(QWidget):
 
         threading.Thread(target=_run, daemon=True).start()
 
-    # --- MOUSE DRAG EVENTS ---
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = True
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
+   
     def mouseMoveEvent(self, event: QMouseEvent):
-        if self._drag_active:
-            new_pos = event.globalPosition().toPoint() - self._drag_pos
-            self.move(new_pos)
-            
-            if self.is_folded:
-                bus.emit_sync("terminal_dragged", {"x": new_pos.x(), "y": new_pos.y()})
-                
-            event.accept()
-
+        # 1. Let the Mixin handle the collisions, screen bounds, and movement
+        super().mouseMoveEvent(event)
+        
+        # 2. Add the custom Terminal folding logic on top!
+        if self._drag_active and self.is_folded:
+            # We use self.pos() because the Mixin has already mathematically verified and moved the window
+            bus.emit_sync("terminal_dragged", {"x": self.pos().x(), "y": self.pos().y()})
+    
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = False
-            event.accept()
+        super().mouseReleaseEvent(event)
+        # When the pill snaps to the grid, force the face to snap with it!
+        if self.is_folded:
+            bus.emit_sync("terminal_dragged", {"x": self.pos().x(), "y": self.pos().y()})
 
     def update_mute_style(self):
         state = self.mute_btn.isChecked()

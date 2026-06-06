@@ -3,13 +3,14 @@ from qasync import asyncSlot
 from event_engine import bus
 
 class UIManager(QObject):
-    def __init__(self, face, library, graph, media, timer):
+    def __init__(self, face, library, graph, media, timer, grid):
         super().__init__()
         self.face = face
         self.library = library
         self.graph = graph
         self.media = media
         self.timer = timer
+        self.grid = grid
         
         self._is_ghost_mode = False
         self._was_graph_open = False
@@ -56,6 +57,9 @@ class UIManager(QObject):
             if self.face: self.face.hide()
             if self.library: self.library.hide()
             
+            # --- SAFETY CATCH: Force hide the grid if it was somehow open ---
+            if self.grid: self.grid.hide()
+            
             # 2. Track & Hide Active Peripherals
             if self.graph and self.graph.windowOpacity() > 0:
                 self._was_graph_open = True
@@ -79,6 +83,7 @@ class UIManager(QObject):
             # 1. Restore Core
             if self.library: self.library.show()
             if self.face: self.face.show()
+            
                 
             # 2. Restore Peripherals ONLY if they were active
             if self._was_graph_open and self.graph: self.graph.show()

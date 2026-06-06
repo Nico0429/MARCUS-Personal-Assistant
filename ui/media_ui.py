@@ -4,12 +4,11 @@ from PySide6.QtGui import QGuiApplication, QMouseEvent
 from PySide6.QtGui import QFont 
 from event_engine import bus
 from qasync import asyncSlot
+from ui.holo_grid import MarcusBaseWindow
 
-class MediaWindow(QWidget):
+class MediaWindow(MarcusBaseWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(360, 130) 
         self.setCursor(Qt.PointingHandCursor)
         
@@ -103,30 +102,12 @@ class MediaWindow(QWidget):
         self.frame_layout.addLayout(self.right_layout)
 
         self.hide()
-        self._drag_active = False
-        self._drag_pos = QPoint()
         
         bus.subscribe("media_ui_control", self.on_media_update)
 
 
 
-    # --- DRAG LOGIC ---
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = True
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self._drag_active:
-            self.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = False
-            event.accept()
-
+    
     # --- UPDATE LOGIC ---
     @asyncSlot(dict)
     async def on_media_update(self, data):

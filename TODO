@@ -1,8 +1,7 @@
 M.A.R.C.U.S. (Matrix Analytics & Resource Controller)
 
 
-Fix hide functionality for timer + buttons for timer
-fix x button for media UI
+Fix timer (1 second, 1 hour, 1 minute)
 Automatically show marcus when wake word is heard (Do this via bus event)
 
 Make him say "mm?" when he hears a wake word. (NOT every time he enters listening mode)

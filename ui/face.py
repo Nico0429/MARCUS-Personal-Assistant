@@ -2,12 +2,16 @@ import sys, math, random, time
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtGui import QPainter, QColor, QPen, QRadialGradient
 from PySide6.QtCore import Qt, QTimer, QPointF, Slot, QPoint
+from ui.holo_grid import MarcusBaseWindow
 
-class MarcusFace(QWidget):
+class MarcusFace(MarcusBaseWindow):
     def __init__(self):
-        super().__init__()
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        # 1. Boot up the Universal Window Physics with collision immunity!
+        super().__init__(ignore_collisions=True, clamp_margin=150)
+        
+        # 2. Add the Face's specific "no focus" flag on top of the base OS flags
+        self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
+        
         self.setFixedSize(400, 400)
         
         # Enable mouse tracking to detect hover movements without clicking
@@ -34,8 +38,7 @@ class MarcusFace(QWidget):
         
         self.trigger_toggle = False  
         self.stop_toggle = False
-        self._drag_active = False
-        self._drag_pos = QPoint()
+        
         
         self.current_scale = 1.0
         self.target_scale = 1.0
@@ -80,9 +83,8 @@ class MarcusFace(QWidget):
 
     def update_tether(self, terminal_pos):
         """Magnetically locks the orb to the side of the folded terminal."""
-        # We keep your exact mathematical offsets (-28 and -177) 
-        # but apply them relative to wherever the terminal actually is!
-        self.move(terminal_pos.x() - 64, terminal_pos.y() - 177)
+        # --- CHANGED 177 to 180 ---
+        self.move(terminal_pos.x() - 64, terminal_pos.y() - 180)
 
 
    # --- HOVER EVENTS ---
@@ -119,28 +121,46 @@ class MarcusFace(QWidget):
                 self.trigger_toggle = True 
 
     def mousePressEvent(self, event):
-        # THE FIX: Removed the 'not self.is_folded' check so you can grab it!
-        if event.button() == Qt.LeftButton:
-            self._drag_active = True
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-        elif event.button() == Qt.RightButton:
+        # 1. Let the Base Class trigger the holo-grid and record click positions
+        super().mousePressEvent(event)
+        
+        # 2. Face's custom Right-Click interrupt
+        if event.button() == Qt.RightButton:
             self.stop_toggle = True
 
     def mouseMoveEvent(self, event):
-        if self._drag_active:
-            new_pos = event.globalPosition().toPoint() - self._drag_pos
-            self.move(new_pos)
-            
-            # THE FIX: Tell the terminal to follow the face!
-            if self.is_folded:
-                from event_engine import bus
-                # NOTE: If you changed the 80 or 177 in update_tether, make sure to use the exact opposite numbers here!
-                bus.emit_sync("sync_terminal_pos", {"x": new_pos.x() + 64, "y": new_pos.y() + 177})
+        super().mouseMoveEvent(event)
+        
+        if self._drag_active and self.is_folded:
+            from event_engine import bus
+            # --- CHANGED 177 to 180 ---
+            bus.emit_sync("sync_terminal_pos", {"x": self.pos().x() + 64, "y": self.pos().y() + 180})
                 
         self.cursor_pos = event.position()
 
     def mouseReleaseEvent(self, event):
-        self._drag_active = False
+        if not self.is_folded:
+            super().mouseReleaseEvent(event)
+        else:
+            self._drag_active = False
+            self.setCursor(Qt.PointingHandCursor)
+            
+            from event_engine import bus
+            bus.emit_sync("holo_grid_toggle", {"show": False})
+            
+            target_pill_x = self.pos().x() + 64
+            # --- CHANGED 177 to 180 ---
+            target_pill_y = self.pos().y() + 180 
+            
+            GRID_SIZE = 40
+            snapped_pill_x = round(target_pill_x / GRID_SIZE) * GRID_SIZE
+            snapped_pill_y = round(target_pill_y / GRID_SIZE) * GRID_SIZE
+            
+            bus.emit_sync("sync_terminal_pos", {"x": snapped_pill_x, "y": snapped_pill_y})
+            
+            # --- CHANGED 177 to 180 ---
+            self.move(snapped_pill_x - 64, snapped_pill_y - 180)
+            event.accept()
 
     @Slot(bool)
     def set_speaking(self, state):

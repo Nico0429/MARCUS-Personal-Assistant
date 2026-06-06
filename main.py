@@ -36,6 +36,7 @@ from ui.library_window import LibraryWindow
 from ui.graph_window import GraphWindow
 from ui.timer_window import TimerWindow
 from ui.edgepulse import EdgePulseOverlay
+from ui.holo_grid import HoloGridOverlay
 
 from ui.ui_manager import UIManager
 import keyboard
@@ -78,6 +79,7 @@ async def main_async():
     brain_window.refresh_graph() 
     timer_window = TimerWindow()
     media_window = MediaWindow()
+    grid_overlay = HoloGridOverlay(grid_size=40)
 
     # --- INITIALIZE THE CENTRAL MANAGER ---
     ui_manager = UIManager(
@@ -85,7 +87,8 @@ async def main_async():
         library=terminal_window,
         graph=brain_window,
         media=media_window,
-        timer=timer_window
+        timer=timer_window,
+        grid=grid_overlay
     )
     # --------------------------------------
 

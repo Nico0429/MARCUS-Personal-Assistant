@@ -109,16 +109,18 @@ class MediaSkill:
                 
             await asyncio.sleep(2)
 
-    async def _on_manual_action(self, data):
+    def _on_manual_action(self, data):
         """Handles physical button clicks from your UI Media Player."""
         action = data.get("action")
         
         if action == "close_ui":
             self.ui_visible = False 
-            await bus.emit("media_ui_control", {"action": "hide"})
+            # We must use asyncio.create_task here because emit is an async function
+            asyncio.create_task(bus.emit("media_ui_control", {"action": "hide"}))
             return
 
-        await WinRTMediaEngine.execute(_async_media_action(action))
+        # Tell the WinRT engine to execute the action in the background
+        asyncio.create_task(WinRTMediaEngine.execute(_async_media_action(action)))
 
     async def execute_media_command(self, command_type, target=None):
         """Handles spoken commands from the ML Router."""

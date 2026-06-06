@@ -4,15 +4,12 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QFrame, QHBoxLayout,
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl, Qt, QPoint, QTimer
 from PySide6.QtGui import QMouseEvent, QFont, QGuiApplication
+from ui.holo_grid import MarcusBaseWindow
 
-
-class GraphWindow(QWidget):
+class GraphWindow(MarcusBaseWindow):
     def __init__(self):
         super().__init__()
         
-
-        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle("MARCUS - Neural Matrix")
         self.setFixedSize(850, 650)
 
@@ -53,8 +50,6 @@ class GraphWindow(QWidget):
         self.browser.page().setBackgroundColor(Qt.transparent)
         self.hud_layout.addWidget(self.browser)
 
-        self._drag_active = False
-        self._drag_pos = QPoint()
         
         # --- THE FIX: LAZY LOADING FLAG ---
         self._needs_refresh = False
@@ -96,19 +91,4 @@ class GraphWindow(QWidget):
             self.browser.setUrl(QUrl.fromLocalFile(html_path))
             self._needs_refresh = False
 
-    # --- DRAG LOGIC ---
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = True
-            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self._drag_active:
-            self.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self._drag_active = False
-            event.accept()
+   
