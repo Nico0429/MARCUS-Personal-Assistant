@@ -148,7 +148,17 @@ class MarcusBrain:
             return False
 
         # --- DELEGATED TO ROUTER ---
-        queries_to_process = await self.router.split_commands(query)
+        raw_queries = await self.router.split_commands(query)
+        
+        # --- THE FIX: Flatten nested arrays from the router ---
+        queries_to_process = []
+        for item in raw_queries:
+            if isinstance(item, list):
+                # If the LLM nested the commands, extract them into the flat list
+                queries_to_process.extend([str(sub_item) for sub_item in item])
+            else:
+                queries_to_process.append(str(item))
+        # ----------------------------------------------------
         
         keep_listening_overall = False
         
